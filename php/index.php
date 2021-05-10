@@ -47,7 +47,7 @@ if(isset($_POST['submit'])){
     if(password_verify($password, $row['password'])){
       session_start();
       $_SESSION["username"] = $username;
-      header("Location: ./login.php");
+      header("Location: ./main.php");
     } else {
       echo "Der Login ist fehlgeschlagen";
     }

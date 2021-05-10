@@ -23,7 +23,11 @@
   </div>
   <div class="form-group">
     <label for="exampleInputPassword1">Password</label>
-    <input type="password" name="password" class="form-control" id="exampleInputPassword1">
+    <input type="password" name="password1" class="form-control" id="exampleInputPassword1">
+  </div>
+  <div class="form-group">
+    <label for="exampleInputPassword2">Confirm your Password</label>
+    <input type="password" name="password2" class="form-control" id="exampleInputPassword2">
   </div>
   <button type="submit" class="btn btn-primary" name="submit">Register</button>
 </form>
@@ -31,30 +35,40 @@
 </div>
 
 <?php
-if(isset($_POST['Username']) && isset($_POST['password'])){
+if(isset($_POST['Username']) && isset($_POST['password1']) && isset($_POST['password2'])){
   $username = $_POST['Username'];
-  $password = $_POST['password'];
+  $password1 = $_POST['password1'];
+  $password2 = $_POST['password2'];
 }
 
 if(isset($_POST['submit'])){
-  //check username
-  $stmt = $con->prepare('SELECT * FROM logins_db WHERE username = :user');
-  $stmt->bindParam(":user", $username);
-  $stmt->execute();
-  $count = $stmt->rowCount();
-  if($username == NULL or $password == NULL){
-    echo 'something went wrong';
-  }else if($count == 0){
-    //user anlegen
-    $stmt = $con->prepare("INSERT INTO logins_db (username, password) VALUES (:user, :pw)");
+  if($password1 === $password2){
+    //check username
+    $stmt = $con->prepare('SELECT * FROM logins_db WHERE username = :user');
     $stmt->bindParam(":user", $username);
-    $hash = password_hash($password, PASSWORD_BCRYPT);
-    $stmt->bindParam(":pw", $hash);
     $stmt->execute();
-    header('./index.php');
+    $count = $stmt->rowCount();
+
+    if($username == NULL or $password1 == NULL or $password2 == NULL){
+      echo 'something went wrong';
+    }
+    else if($count == 0){
+      //user anlegen
+      $stmt = $con->prepare("INSERT INTO logins_db (username, password) VALUES (:user, :pw)");
+      $stmt->bindParam(":user", $username);
+      $hash = password_hash($password1, PASSWORD_BCRYPT);
+      $stmt->bindParam(":pw", $hash);
+      $stmt->execute();
+      session_start();
+      $_SESSION["username"] = $username;
+      header("Location: ./main.php");
+    } else {
+      echo "username vergeben";
+    }
+  
   } else {
-    echo "username vergeben";
-  }
+    echo 'your passwords aren\'t equal!';
+  }  
 }
 ?>
 
